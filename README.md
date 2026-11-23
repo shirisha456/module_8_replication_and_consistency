@@ -76,24 +76,6 @@ The program starts from `Primary = 10, Secondary = 10` and writes `stock = 8` to
 
 ![Successful replication](screenshots/1_successful_replication.png)
 
-Actual output from `python3 replication_simulation.py`:
-
-```text
-=== Successful Replication Demo ===
-primary=10 secondary=10 converged=True
-replica=primary action=write stock=8
-replication=pending pending_updates=[8]
--- before replication is processed --
-read_from=primary stock=8
-read_from=secondary stock=10 stale_read=True
-replica=secondary action=replicated stock=10->8
-replication=complete pending_updates=[]
--- after replication --
-read_from=primary stock=8
-read_from=secondary stock=8 stale_read=False
-primary=8 secondary=8 converged=True
-```
-
 1. The Primary receives `8` (`replica=primary action=write stock=8`).
 2. Replication runs (`replica=secondary action=replicated stock=10->8`).
 3. The Secondary now holds `8`.
@@ -106,20 +88,6 @@ This demo starts from a fresh state (`Primary = 10, Secondary = 10`). Replicatio
 **Screenshot:**
 
 ![Stale read](screenshots/2_stale_read.png)
-
-Actual output:
-
-```text
-=== Stale Read Demo ===
-primary=10 secondary=10 converged=True
-replication=paused
-replica=primary action=write stock=9
-replication=pending pending_updates=[9]
-replication=paused secondary_not_updated pending_updates=[9]
-read_from=primary stock=9
-read_from=secondary stock=10 stale_read=True
-primary=9 secondary=10 converged=False
-```
 
 | Step | Primary | Secondary |
 |------|---------|-----------|
@@ -139,27 +107,14 @@ After the stale read is printed, replication is **resumed**. The pending update 
 
 ![Recovery and convergence](screenshots/3_recovery_convergence.png)
 
-Actual output:
-
-```text
-=== Recovery and Convergence Demo ===
-replication=resumed
-replica=secondary action=replicated stock=10->9
-replication=complete pending_updates=[]
-read_from=primary stock=9
-read_from=secondary stock=9 stale_read=False
-primary=9 secondary=9 converged=True
-replicas_converged=True
-```
-
 - Replication resumed (`replication=resumed`).
 - The Secondary receives `9` (`stock=10->9`), and the pending queue is now empty.
 - Primary = `9` and Secondary = `9`.
 - **The replicas have converged again** (`replicas_converged=True`).
 
-## 7. Evidence (Screenshots and Terminal Output)
+## 7. Evidence (Screenshots)
 
-Each section above includes a real screenshot of a terminal run plus the same output as copyable text. Each screenshot command runs the full program and uses `sed` to display only that demo's section. The simulation has no randomness or timing, so every run prints the same output.
+Each section above includes a real screenshot of a terminal run. Each screenshot command runs the full program and uses `sed` to display only that demo's section. The simulation has no randomness or timing, so every run prints the same output.
 
 | Screenshot | Command |
 |---|---|
@@ -171,22 +126,6 @@ Each section above includes a real screenshot of a terminal run plus the same ou
 **Unit tests screenshot:**
 
 ![Unit tests](screenshots/4_unit_tests.png)
-
-Unit test output:
-
-```text
-$ python3 -m unittest -v test_replication_simulation
-test_initial_state (test_replication_simulation.TestReplicationSimulation) ... ok
-test_normal_replication (test_replication_simulation.TestReplicationSimulation) ... ok
-test_paused_replication_causes_stale_read (test_replication_simulation.TestReplicationSimulation) ... ok
-test_resume_replication_converges (test_replication_simulation.TestReplicationSimulation) ... ok
-test_write_goes_to_primary_first (test_replication_simulation.TestReplicationSimulation) ... ok
-
-----------------------------------------------------------------------
-Ran 5 tests in 0.000s
-
-OK
-```
 
 ## Reflection
 
